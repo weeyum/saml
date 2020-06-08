@@ -635,12 +635,18 @@ func (sp *ServiceProvider) validateAssertion(assertion *Assertion, possibleReque
 	}
 	for _, subjectConfirmation := range assertion.Subject.SubjectConfirmations {
 		requestIDvalid := false
-		for _, possibleRequestID := range possibleRequestIDs {
-			if subjectConfirmation.SubjectConfirmationData.InResponseTo == possibleRequestID {
-				requestIDvalid = true
-				break
+
+		if sp.AllowIDPInitiated {
+			requestIDvalid = true
+		} else {
+			for _, possibleRequestID := range possibleRequestIDs {
+				if subjectConfirmation.SubjectConfirmationData.InResponseTo == possibleRequestID {
+					requestIDvalid = true
+					break
+				}
 			}
 		}
+
 		if !requestIDvalid {
 			return fmt.Errorf("assertion SubjectConfirmation one of the possible request IDs (%v)", possibleRequestIDs)
 		}
